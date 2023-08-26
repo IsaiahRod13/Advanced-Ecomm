@@ -1,7 +1,15 @@
-function renderBooks(filter) {
+let books;
+
+async function renderBooks(filter) {
   const booksWrapper = document.querySelector(".books");
 
-  const books = getBooks();
+  booksWrapper.classList += ' books__loading'
+
+  if (!books) {
+    books = await getBooks();
+  }
+  
+  booksWrapper.classList.remove('books__loading')
 
   if (filter === "LOW_TO_HIGH") {
     books.sort(
@@ -13,47 +21,48 @@ function renderBooks(filter) {
       (a, b) =>
         (b.salePrice || b.originalPrice) - (a.salePrice || a.originalPrice)
     );
-  }
-  if (filter === "RATING") {
+  } else if (filter === "RATING") {
     books.sort((a, b) => b.rating - a.rating);
   }
 
-  const booksHTML = books.map((book) => {
+  const booksHtml = books
+    .map((book) => {
       return `<div class="book">
-      <figure class="book__img--wrapper">
-        <img class="book__img" src="${book.url}" alt="">
-      </figure>
-      <div class="book__title">
-        ${book.title}
-      </div>
-      <div class="book__ratings">
-     ${ratingsHTML(book.rating)}
-      </div>
-      <div class="book__price">
+    <figure class="book__img--wrapper">
+      <img class="book__img" src="${book.url}" alt="">
+    </figure>
+    <div class="book__title">
+      ${book.title}
+    </div>
+    <div class="book__ratings">
+      ${ratingsHTML(book.rating)}
+    </div>
+    <div class="book__price">
       ${priceHTML(book.originalPrice, book.salePrice)}
-      </div>
-    </div>`;
+    </div>
+  </div>`;
     })
     .join("");
 
-  booksWrapper.innerHTML = booksHTML;
+  booksWrapper.innerHTML = booksHtml;
 }
 
 function priceHTML(originalPrice, salePrice) {
   if (!salePrice) {
     return `$${originalPrice.toFixed(2)}`;
-  } else {
-    return `<span class="book__price--normal">$${originalPrice}</span> $${salePrice} `;
   }
+  return `<span class="book__price--normal">$${originalPrice.toFixed(
+    2
+  )}</span>$${salePrice.toFixed(2)}`;
 }
 
 function ratingsHTML(rating) {
   let ratingHTML = "";
-  for (let i = 0; i < Math.floor(rating); i++) {
+  for (let i = 0; i < Math.floor(rating); ++i) {
     ratingHTML += '<i class="fas fa-star"></i>\n';
   }
   if (!Number.isInteger(rating)) {
-    ratingHTML += '<i class="fas fa-star-half-alt"></i>';
+    ratingHTML += '<i class="fas fa-star-half-alt"></i>\n';
   }
   return ratingHTML;
 }
@@ -68,7 +77,7 @@ setTimeout(() => {
 
 // FAKE DATA
 function getBooks() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
         {
@@ -76,7 +85,7 @@ function getBooks() {
           title: "Crack the Coding Interview",
           url: "assets/crack the coding interview.png",
           originalPrice: 49.95,
-          salePrice: null,
+          salePrice: 14.95,
           rating: 4.5,
         },
         {
@@ -84,7 +93,7 @@ function getBooks() {
           title: "Atomic Habits",
           url: "assets/atomic habits.jpg",
           originalPrice: 39,
-          salePrice: 5,
+          salePrice: null,
           rating: 5,
         },
         {
@@ -92,7 +101,7 @@ function getBooks() {
           title: "Deep Work",
           url: "assets/deep work.jpeg",
           originalPrice: 29,
-          salePrice: null,
+          salePrice: 12,
           rating: 5,
         },
         {
@@ -140,15 +149,15 @@ function getBooks() {
           title: "The 5 Second Rule",
           url: "assets/book-6.jpeg",
           originalPrice: 35,
-          salePrice: 15,
-          rating: 4,
+          salePrice: null,
+          rating: 2,
         },
         {
           id: 10,
           title: "Your Next Five Moves",
           url: "assets/book-7.jpg",
           originalPrice: 40,
-          salePrice: 22,
+          salePrice: null,
           rating: 4,
         },
         {
@@ -159,7 +168,7 @@ function getBooks() {
           salePrice: null,
           rating: 4.5,
         },
-      ])
+      ]);
     }, 1000);
-  })
+  });
 }
